@@ -1,14 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronDown, Github, Linkedin, Mail, ExternalLink, Menu, X, Code, Palette, Smartphone, Zap, Terminal, Database, Globe, Cpu } from 'lucide-react';
 import Lenis from 'lenis';
+import emailjs from '@emailjs/browser';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+interface FormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+
 
 function App() {
+   const form = useRef<HTMLFormElement>(null);
+   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     // Initialize Lenis smooth scrolling
     const lenis = new Lenis();
+ 
 
     // Animation frame for Lenis
     function raf(time: number) {
@@ -90,9 +112,67 @@ function App() {
     { name: "GraphQL APIs", level: 91, icon: <Smartphone />, color: "from-yellow-400 to-orange-500" },
     { name: "TypeORM & CMS", level: 89, icon: <Cpu />, color: "from-indigo-400 to-blue-500" }
   ];
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Validation
+    if (!formData.name || !formData.email || !formData.message || !formData.subject) {
+      console.log("form subbmiting error");
+      toast.error("Please fill in all fields.");
+      // toast("Please fill all required fields.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (form.current) {
+      try {
+        const result = await emailjs.sendForm(
+          'service_jngm9k9', // replace with actual service ID
+          'template_pfaso5c', // replace with actual template ID
+          form.current,
+          'Q1ye_AUlarQ6qwBdS' // your public key
+        );
+
+        console.log('Email sent:', result.text);
+
+        toast("Message Send => We’ll get back to you soon!");
+
+        // toast({
+        //   title: "Message Sent",
+        //   description: "We’ll get back to you soon!",
+        // });
+
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
+
+      } catch (error) {
+        console.error('Email sending failed:', error);
+        toast.error("Failed to send message. Please try again.")
+        // setFormStatus({
+        //   type: 'error',
+        //   message: 'Failed to send message. Please try again.'
+        // });
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden relative">
+       <ToastContainer position="top-right" autoClose={3000} />
       {/* Enhanced Animated Background */}
       <div className="fixed inset-0 opacity-20">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900"></div>
@@ -207,7 +287,7 @@ function App() {
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-300 mb-4 max-w-3xl mx-auto leading-relaxed">
-              Senior Software Architect & Innovation Engineer
+              Software Architect & Innovation Engineer
             </p>
             
             <p className="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">
@@ -215,13 +295,13 @@ function App() {
             </p>
             
             <div className="flex justify-center space-x-6 mb-16">
-              <a href="#" className="group p-4 bg-gray-800/50 backdrop-blur-sm rounded-xl hover:bg-emerald-500/20 transition-all duration-300 hover:scale-110 hover:rotate-3 transform border border-gray-700/50 hover:border-emerald-500/50">
+              <a href="https://github.com/Jaingagan2610" target="_blank" rel="noopener noreferrer" className="group p-4 bg-gray-800/50 backdrop-blur-sm rounded-xl hover:bg-emerald-500/20 transition-all duration-300 hover:scale-110 hover:rotate-3 transform border border-gray-700/50 hover:border-emerald-500/50">
                 <Github className="w-6 h-6 group-hover:scale-125 transition-transform text-gray-300 group-hover:text-emerald-400" />
               </a>
-              <a href="#" className="group p-4 bg-gray-800/50 backdrop-blur-sm rounded-xl hover:bg-violet-500/20 transition-all duration-300 hover:scale-110 hover:rotate-3 transform border border-gray-700/50 hover:border-violet-500/50">
+              <a href="https://www.linkedin.com/in/gagan-jain-24a1aa213" target="_blank" rel="noopener noreferrer" className="group p-4 bg-gray-800/50 backdrop-blur-sm rounded-xl hover:bg-violet-500/20 transition-all duration-300 hover:scale-110 hover:rotate-3 transform border border-gray-700/50 hover:border-violet-500/50">
                 <Linkedin className="w-6 h-6 group-hover:scale-125 transition-transform text-gray-300 group-hover:text-violet-400" />
               </a>
-              <a href="#" className="group p-4 bg-gray-800/50 backdrop-blur-sm rounded-xl hover:bg-cyan-500/20 transition-all duration-300 hover:scale-110 hover:rotate-3 transform border border-gray-700/50 hover:border-cyan-500/50">
+              <a href="mailto:gaganjain988@gmail.com"  target="_blank" rel="noopener noreferrer" className="group p-4 bg-gray-800/50 backdrop-blur-sm rounded-xl hover:bg-cyan-500/20 transition-all duration-300 hover:scale-110 hover:rotate-3 transform border border-gray-700/50 hover:border-cyan-500/50">
                 <Mail className="w-6 h-6 group-hover:scale-125 transition-transform text-gray-300 group-hover:text-cyan-400" />
               </a>
             </div>
@@ -401,12 +481,14 @@ function App() {
           </div>
 
           <div className="max-w-2xl mx-auto">
-            <form className="space-y-6">
+            {/* <form className="space-y-6"  ref={form} onSubmit={handleSubmit}>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="group relative">
                   <input 
                     type="text" 
                     placeholder="Your Name"
+                    value={formData.name}
+                    onChange={handleChange}
                     className="w-full p-4 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:border-emerald-500/50 focus:outline-none transition-all duration-300 group-hover:border-gray-600/50 focus:transform focus:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -415,6 +497,8 @@ function App() {
                   <input 
                     type="email" 
                     placeholder="Your Email"
+                    value={formData.email}
+                    onChange={handleChange}
                     className="w-full p-4 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:border-violet-500/50 focus:outline-none transition-all duration-300 group-hover:border-gray-600/50 focus:transform focus:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -425,6 +509,8 @@ function App() {
                 <input 
                   type="text" 
                   placeholder="Subject"
+                  value={formData.subject}
+                  onChange={handleChange}
                   className="w-full p-4 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:border-cyan-500/50 focus:outline-none transition-all duration-300 group-hover:border-gray-600/50 focus:transform focus:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -434,6 +520,8 @@ function App() {
                 <textarea 
                   rows={6}
                   placeholder="Your Message"
+                  value={formData.message}
+                  onChange={handleChange}
                   className="w-full p-4 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:border-orange-500/50 focus:outline-none transition-all duration-300 group-hover:border-gray-600/50 focus:transform focus:scale-105 resize-none"
                 ></textarea>
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -442,13 +530,84 @@ function App() {
               <div className="text-center">
                 <button 
                   type="submit"
+                  disabled={isSubmitting}
                   className="px-12 py-4 bg-gradient-to-r from-emerald-600 to-cyan-600 rounded-xl font-bold text-white hover:shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-110 hover:rotate-1 transform relative overflow-hidden group glow-pulse shimmer"
                 >
-                  <span className="relative z-10">Send Message</span>
+                  <span className="relative z-10">{isSubmitting ? "Sending..." : "Send Message"}</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </button>
               </div>
-            </form>
+            </form> */}
+             <form
+      className="space-y-6"
+      ref={form}
+      onSubmit={handleSubmit}
+    >
+      {/* Name & Email */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="group relative">
+          <input
+            type="text"
+            name="name"
+            placeholder="Your Name"
+            required
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full p-4 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:border-emerald-500/50 focus:outline-none transition-all duration-300 group-hover:border-gray-600/50"
+          />
+        </div>
+
+        <div className="group relative">
+          <input
+            type="email"
+            name="email"
+            required
+            placeholder="Your Email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full p-4 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:border-violet-500/50 focus:outline-none transition-all duration-300 group-hover:border-gray-600/50"
+          />
+        </div>
+      </div>
+
+      {/* Subject */}
+      <div className="group relative">
+        <input
+          type="text"
+          name="subject"
+          placeholder="Subject"
+          value={formData.subject}
+          onChange={handleChange}
+          className="w-full p-4 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:border-cyan-500/50 focus:outline-none transition-all duration-300 group-hover:border-gray-600/50"
+        />
+      </div>
+
+      {/* Message */}
+      <div className="group relative">
+        <textarea
+          name="message"
+          required
+          rows={6}
+          placeholder="Your Message"
+          value={formData.message}
+          onChange={handleChange}
+          className="w-full p-4 bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:border-orange-500/50 focus:outline-none transition-all duration-300 group-hover:border-gray-600/50 resize-none"
+        ></textarea>
+      </div>
+
+      {/* Submit Button */}
+      <div className="text-center">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={`px-12 py-4 bg-gradient-to-r from-emerald-600 to-cyan-600 rounded-xl font-bold text-white hover:shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-110 hover:rotate-1 transform relative overflow-hidden group ${
+            isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+          }`}
+        >
+          {isSubmitting ? "Sending..." : "Send Message"}
+        </button>
+      </div>
+    </form>
           </div>
         </div>
       </section>
